@@ -28,12 +28,8 @@ public class Day17 {
         long requestedDrops = 1000000000000L;
 
         Set<Point> points = buildStack("day17-actual.txt", 10000);
-        Long maxHeight = getMaxHeight(points);
-        System.out.println("Stack height is: " + maxHeight);
         List<Integer> integers = renderToEncoded(points);
-        System.out.println("Rendered height is: " + integers.size());
 
-        System.out.println(integers);
         // Brute force look for repeating interval
         Integer interval = 2728;    // TODO not repeatable for toDrop > 5000!?
         /*
@@ -54,11 +50,11 @@ public class Day17 {
         Long rockAtStartOfSecondRepeat = heights.get(interval * 2L);
         Long rockAtStartOfThirdRepeat = heights.get(interval * 3L);
         Long rockRepeat = rockAtStartOfThirdRepeat - rockAtStartOfSecondRepeat;
-        System.out.println("Stack repeats every " + rockRepeat + " rocks");
+        // System.out.println("Stack repeats every " + rockRepeat + " rocks");
 
         long numOfRepeatsRequired = requestedDrops / rockRepeat;
         long remainingRocks = requestedDrops % rockRepeat;
-        System.out.println(numOfRepeatsRequired + " whole repeats in the big stack with remaining " + remainingRocks);
+        // System.out.println(numOfRepeatsRequired + " whole repeats in the big stack with remaining " + remainingRocks);
 
         // How high is this many repeats?
         long heightOfRepeats = numOfRepeatsRequired * interval;
@@ -75,7 +71,6 @@ public class Day17 {
 
     private long simulate(String filename, long toDrop) throws Exception {
         Set<Point> fixed = buildStack(filename, toDrop);
-        render(fixed);
         return getMaxHeight(fixed);
     }
 
