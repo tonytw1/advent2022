@@ -87,19 +87,23 @@ public class Day16 {
     private Map<String, Map<String, Integer>> measureDistancesBetweenNodes(Map<String, List<String>> graph) {
         Map<String, Map<String, Integer>> shortest = new HashMap<>();
         for (String node : graph.keySet()) {
-            shortest.put(node, shortestPath(node, graph));
+            // As an exercise crosscheck Dijkstra with BFS distances
+            Map<String, Integer> byDijkstra = shortestPathByDijkstra(node, graph);
+            Map<String, Integer> byBFS = shortestPathByBFS(node, graph);
+            assertEquals(byDijkstra, byBFS);
+            shortest.put(node, byDijkstra);
         }
         return shortest;
     }
 
-    private Map<String, Integer>  shortestPath(String node, Map<String, List<String>> graph) {
+    private Map<String, Integer> shortestPathByDijkstra(String node, Map<String, List<String>> graph) {
         Map<String, Integer> dists = new HashMap<>();
 
         // Perform a least distance crawl from each node to the other; ignore the bidirectional optimisation
         Set<String> settled = new HashSet<>();
-        // The oart 1 example will pass without the comparator been correctly set up because the keys are in correct string ordering by accident!!!
+        // The part 1 example will pass without the comparator been correctly set up because the keys are in correct string ordering by accident!!!
         // PriorityQueue<String> unsettled = new PriorityQueue();
-        PriorityQueue<String> unsettled = new PriorityQueue(Comparator.comparingLong(dists::get));
+        PriorityQueue<String> unsettled = new PriorityQueue<>(Comparator.comparingLong(dists::get));
 
         for (String v : graph.keySet()) {
             dists.put(v, Integer.MAX_VALUE);
@@ -121,6 +125,56 @@ public class Day16 {
                 }
             }
         }
+        return dists;
+    }
+
+    @Test
+    public void testBFS() throws Exception {
+        flowRates = new HashMap<>();
+        Map<String, List<String>> graph = parseGraph("day16.txt");
+
+        Map<String, Integer> distances = shortestPathByBFS("BB", graph);
+
+        assertEquals(0, distances.get("BB"));
+        assertEquals(6, distances.get("HH"));
+    }
+
+    private Map<String, Integer> shortestPathByBFS(String node, Map<String, List<String>> graph) {
+        Map<String, Integer> dists = new HashMap<>();
+        final String endOfLayerMarker = "|";
+
+        Queue<String> toVisit = new ArrayDeque<>();
+        Set<String> visited = new HashSet<>();
+        // Enqueue the start node
+        toVisit.add(node);
+        visited.add(node);
+        // And mark the end of the first later
+        toVisit.add(endOfLayerMarker);
+
+        int d = 0;  // Keep a track of how many onion layers we have completed.
+        // Run until all nodes visited.
+        while (!toVisit.isEmpty()) {
+            String current = toVisit.poll();
+            // If this is the end of layer shell then increment the current depth
+            // and mark a new layer as we have exhausted all nodes at the current layer
+            if (current.equals(endOfLayerMarker)) {
+                d++;
+                if (!toVisit.isEmpty()) {
+                    toVisit.add(endOfLayerMarker);
+                }
+
+            } else {
+                // Record the distance to this node and queue the unvisited adj nodes
+                dists.put(current, d);
+                for (String adj: graph.get(current)) {
+                    if (!visited.contains(adj)) {
+                        toVisit.offer(adj);
+                        visited.add(adj);
+                    }
+                }
+            }
+        }
+
         return dists;
     }
 
@@ -159,7 +213,7 @@ public class Day16 {
     private void assertGraphIsBidirectional(Map<String, List<String>> graph) {
         // Every node should have the same number of outgoing as incoming links
         for (String node: graph.keySet()) {
-            Set<String> outGoingLinks = new HashSet(graph.get(node));
+            Set<String> outGoingLinks = new HashSet<>(graph.get(node));
             Set<String> nodesWithIncomingLinks = new HashSet<>();
             for (String adj : graph.keySet()) {
                 if (graph.get(adj).contains(node)) {
@@ -172,7 +226,7 @@ public class Day16 {
 
     // Had alot of trouble with the part1 example passing but the part1 actual been too low; shortest distancea where not symetrical because the pq comparator was node string values!
     @Test
-    public void testDistances() throws Exception {
+    public void canMeasureShortestDistances() throws Exception {
         flowRates = new HashMap<>();
 
         Map<String, Map<String, Integer>> shortestDistances = measureDistancesBetweenNodes(parseGraph("day16.txt"));
