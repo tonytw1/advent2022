@@ -23,16 +23,21 @@ public class Day17 {
         assertEquals(3157, simulate("day17-actual.txt", 2022));
     }
 
-    //@Test
+    @Test
     public void day17part2() throws Exception {
+        assertEquals(1514285714288L, processPart2("day17.txt"));
+        assertEquals(1581449275319L, processPart2("day17-actual.txt"));
+    }
+
+    private long processPart2(String filename) throws Exception {
         long requestedDrops = 1000000000000L;
 
-        Set<Point> points = buildStack("day17-actual.txt", 10000);
+        Set<Point> points = buildStack(filename, 10000);
         List<Integer> integers = renderToEncoded(points);
 
-        // Brute force look for repeating interval
-        Integer interval = 2728;    // TODO not repeatable for toDrop > 5000!?
-        /*
+        // Brute force look for repeating interval  // TODO suffix sort might work here?
+        //Integer interval = 2728;    // TODO not repeatable for toDrop > 5000!?
+        Integer interval = null;
         for (int i = 10; i < 5000; i++) {
             List<Integer> a = integers.subList(0, i);
             List<Integer> b = integers.subList(i, i + i);
@@ -42,7 +47,6 @@ public class Day17 {
                 break;
             }
         }
-        */
         assertNotNull(interval, "No repeat found");
 
         // Now try to determine how many rocks are in the repeating rows
@@ -65,8 +69,7 @@ public class Day17 {
                 heightOfReaminder = height;
             }
         }
-        //assertEquals(1514285714288L, heightOfRepeats + heightOfReaminder);
-        assertEquals(1581449275319L, heightOfRepeats + heightOfReaminder);
+        return heightOfRepeats + heightOfReaminder;
     }
 
     private long simulate(String filename, long toDrop) throws Exception {
