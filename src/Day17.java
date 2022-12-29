@@ -81,6 +81,8 @@ public class Day17 {
         Queue<Integer> wind = parseFile(filename);
         Queue<Sprite> sprites = makeSprites();
 
+        long maxHeight = 0L;
+
         Rock rock = null;
         boolean isStruck = false;
         Set<Point> fixed = new HashSet<>();
@@ -90,15 +92,9 @@ public class Day17 {
                 Sprite sprite = sprites.poll();
                 sprites.offer(sprite);
 
-                long maxHeight = getMaxHeight(fixed);
-
                 long y = maxHeight + sprite.getHeight() + NEW_ROCK_CLEAR_ROWS;
                 rock = new Rock(NEW_ROCK_LEFT_EDGE_UNITS_FROM_WALL, y, sprite);
                 isStruck = false;
-
-                Set<Point> snapshot = new HashSet<>(fixed);
-                snapshot.addAll(rock.sprite.at(rock.x, rock.y));
-                //render(snapshot);
             }
 
             // Adjust the sprites x position of possible.
@@ -126,8 +122,7 @@ public class Day17 {
                 // This rock is in its final position; burn these rock's pixels into the fixed points
                 fixed.addAll(rock.sprite.at(rock.x, rock.y));
                 isStruck = true;
-                Long maxHeight = getMaxHeight(fixed);
-                heights.putIfAbsent(maxHeight, dropped);
+                maxHeight = Math.max(rock.y, maxHeight);   // This is faster than calling getMaxHeight all the time
                 dropped++;
             }
         }
